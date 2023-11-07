@@ -20,30 +20,32 @@ func main() {
 	write(conn)
 }
 func read(conn net.Conn) {
-	// defer conn.Close()
 	buf := make([]byte, 1024)
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
 			log.Fatalf("read err:%v\n", err)
 		}
-		fmt.Printf("receive msg:%v\n", buf[:n])
+		fmt.Printf("%v\n", string(buf[:n]))
 	}
 
 }
 func write(conn net.Conn) {
-	// defer conn.Close()
 	inputStream := bufio.NewReader(os.Stdin)
 	for {
 		input, err := inputStream.ReadString('\n')
 		if err != nil {
-			log.Fatalf("input err:%v\n", err)
+			fmt.Printf("input err:%v\n", err)
+			return
 		}
-		n, err := conn.Write([]byte(input))
+		msg := []byte(input)
+		//delete /r/n
+		_, err = conn.Write(msg[:len(msg)-2])
 		if err != nil {
-			log.Fatalf("write err:%v\n", err)
+			fmt.Printf("write err:%v\n", err)
+			return
 		}
-		fmt.Printf("write msg:%v\n", input[:n-2])
+		// fmt.Printf("write msg:%v\n", string(input[:n-2]))
 	}
 
 }
