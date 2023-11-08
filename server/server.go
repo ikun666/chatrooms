@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 )
 
 type User struct {
@@ -86,8 +87,24 @@ func ClientRead(user User) {
 			BroadcastChan <- fmt.Sprintf("user:%v go offline", user.Name)
 			return
 		}
-		fmt.Printf("receive msg:%v\n", string(buf[:n]))
-		BroadcastChan <- fmt.Sprintf("%v: %v", user.Name, string(buf[:n]))
+		msg := string(buf[:n])
+
+		if len(msg) > 9 && msg[:8] == "--rename" { //--rename ikun
+			BroadcastChan <- fmt.Sprintf("%v rename: %v", user.Name, msg[9:])
+			user.Name = msg[9:]
+			OnlineUserMap[user.ID] = user
+		} else if msg == "--who" {
+			users := make([]string, 0)
+			for k := range OnlineUserMap {
+				users = append(users, OnlineUserMap[k].Name)
+			}
+			msg = strings.Join(users, "\n")
+			user.Msg <- msg
+		} else {
+			fmt.Printf("receive %v msg:%v\n", user.Name, msg)
+			BroadcastChan <- fmt.Sprintf("%v: %v", user.Name, msg)
+		}
+
 	}
 
 }
