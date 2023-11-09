@@ -12,7 +12,8 @@ func main() {
 	//1.connection
 	conn, err := net.Dial("tcp", ":8080")
 	if err != nil {
-		log.Fatalf("dial err:%v\n", err)
+		fmt.Printf("dial err:%v\n", err)
+		return
 	}
 	defer conn.Close()
 
@@ -35,15 +36,13 @@ func write(conn net.Conn) {
 	for {
 		input, err := inputStream.ReadString('\n')
 		if err != nil {
-			fmt.Printf("input err:%v\n", err)
-			return
+			log.Fatalf("input err:%v\n", err)
 		}
 		msg := []byte(input)
 		//delete /r/n
 		_, err = conn.Write(msg[:len(msg)-2])
 		if err != nil {
-			fmt.Printf("write err:%v\n", err)
-			return
+			log.Fatalf("write err:%v\n", err)
 		}
 		// fmt.Printf("write msg:%v\n", string(input[:n-2]))
 	}
